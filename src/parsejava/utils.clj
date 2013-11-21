@@ -8,7 +8,9 @@
 
 (defn all-classes [package]
   "Returns all classes in the given pakage (including sub-packages"
-  (map #(Class/forName %) (complete.core/completions package)))
+  (map #(Class/forName %)
+       (map  #(.replace % "/" ".")
+             (filter #(.startsWith % package) @complete.core/top-level-classes))))
 
 (defn- static? [field]
   (java.lang.reflect.Modifier/isStatic (.getModifiers field)))
@@ -30,8 +32,10 @@
 
 (defn property-field? [field]
   "true if the field is primitive or String (data can be taken directly)"
-  (or (-> (.getType field) .isPrimitive)
-      (-> (.getType field) (= String))))
+  (and (not (or (.startsWith (.getName field) "begin")
+                (.startsWith (.getName field) "end")))
+       (or (-> (.getType field) .isPrimitive)
+           (-> (.getType field) (= String)))))
 
 (defn spell-check [field name]
   "names that are mis-spelled are corrected and returned"

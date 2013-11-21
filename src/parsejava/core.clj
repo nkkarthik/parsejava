@@ -12,12 +12,15 @@
   "Convert java string to ast"
   (visit (java-ast java)))
 
-(defmulti visit (fn [unit] (class unit)))
+(defn parse-file [java-file]
+  (parse (slurp java-file)))
 
-(defonce ast-package "japa.parser.ast")
+(defmulti visit (fn [unit] (class unit)))
 
 (defmethod visit :default [unit])
    
+(defonce ast-package "japa/parser/ast")
+
 (defmacro defvisit [cls]
   (let [unit (gensym "u")
         fields (declared-fields cls)]
@@ -36,10 +39,10 @@
 
 ;; (defmethod visit :default [unit] nil)
 
-(doseq [cls (all-classes ast-package)]
+(doseq [cls (all-classes "japa/parser/ast/")]
   (eval `(defvisit ~cls)))
 
-(defn macroprint [m] (clojure.pprint/pprint (macroexpand-all m)))
+;; (defn macroprint [m] (clojure.pprint/pprint (macroexpand-all m)))
 
 (defn -main
   "I don't do a whole lot."
